@@ -297,6 +297,7 @@ Q_G(1:t,1:t)=DNA_jie(Q_last_G,H(1));
 Q1_B=DNA_bian(fenkuai(t,I3,1),X(1));
 Q_last_B=DNA_yunsuan(Q1_B,Q2,Z(1));
 Q_B(1:t,1:t)=DNA_jie(Q_last_B,H(1));
+
 for i=2:r
     Q1_R=DNA_bian(fenkuai(t,I1,i),X(i));   %对原始图像R通道每一个分块按X对应的序号进行DNA编码
     Q1_G=DNA_bian(fenkuai(t,I2,i),X(i));
@@ -331,8 +332,10 @@ Q_G=uint8(Q_G);
 Q_B=uint8(Q_B);
 
 %% 抗裁剪
-xx0=0.3456;
-xx1=0.4532;
+xx0=sum(I2(:))/(255*SUM);     %G通道：平均灰度值，作为密钥
+xx0=floor(xx0*10^4)/10^4;     %保留4位小数
+xx1=sum(I3(:))/(255*SUM);     %B通道：平均灰度值，作为密钥
+xx1=floor(xx1*10^4)/10^4;     %保留4位小数
 ppx=zeros(1,M+1000);        %预分配内存
 ppy=zeros(1,N+1000); 
 ppx(1)=xx0;
@@ -594,8 +597,8 @@ RXY2_DJX_B=COVXY2_DJX_B/sqrt(DX2_B*DY2_DJX_B);
 %% 输出数据信息
 disp('加密成功');
 disp('密钥：');
-disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0)]);
-disp(['密钥5：z(0)=',num2str(Z0),'   密钥6：h(0)=',num2str(H0),'   密钥7：M1=',num2str(M1),'   密钥8：N1=',num2str(N1)]);
+disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0),'   密钥5：z(0)=',num2str(Z0),]);
+disp(['密钥6：h(0)=',num2str(H0),'   密钥7：M1=',num2str(M1),'   密钥8：N1=',num2str(N1),'   密钥9：xx0=',num2str(xx0),'   密钥10：xx1=',num2str(xx1)]);
 disp('信息熵：');
 disp(['原始图片R通道信息熵=',num2str(xxs1_R),'  原始图片G通道信息熵=',num2str(xxs1_G),'  原始图片B通道信息熵=',num2str(xxs1_B)]);
 disp(['加密图片R通道信息熵=',num2str(xxs2_R),'  加密图片G通道信息熵=',num2str(xxs2_G),'  加密图片B通道信息熵=',num2str(xxs2_B)]);

@@ -9,9 +9,9 @@ t=4;    %分块大小
 M1=0;   %加密时补零的参数，M1=mod(M,t);作为密钥
 N1=0;   %加密时补零的参数，N1=mod(N,t);作为密钥
 SUM=M*N;
-u=3.99;
-xx0=0.3456;
-xx1=0.4532;
+u=3.99;     %密钥1：μ
+xx0=0.3883;
+xx1=0.4134;
 ppx=zeros(1,M+1000);        %预分配内存
 ppy=zeros(1,N+1000); 
 ppx(1)=xx0;
@@ -52,7 +52,7 @@ for i=M:-1:1
 end
 %% 2.产生Logistic混沌序列
 % u=3.990000000000001; %密钥敏感性测试  10^-15
-u=3.99;%密钥：Logistic参数μ
+%u=3.99;%密钥：Logistic参数μ
 % x0=0.7067000000000001; %密钥敏感性测试  10^-16
 x0=0.7067; %密钥：Logistic初值x0
 % x0=0.3462;            %home图片
@@ -159,7 +159,7 @@ cha=sum(sum(sum(Q_jiemi-II)));      %两幅图做差后求总和
 %% 保存图片
 imwrite(Q_jiemi,'../原始、加密、解密图片/解密后的lena.png','png');       
 disp('您输入的解密密钥为：');
-disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0)]);
-disp(['密钥5：z(0)=',num2str(Z0),'   密钥6：h(0)=',num2str(H0),'   密钥7：M1=',num2str(M1),'   密钥8：N1=',num2str(N1)]);
+disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0),'   密钥5：z(0)=',num2str(Z0),]);
+disp(['密钥6：h(0)=',num2str(H0),'   密钥7：M1=',num2str(M1),'   密钥8：N1=',num2str(N1),'   密钥9：xx0=',num2str(xx0),'   密钥10：xx1=',num2str(xx1)]);
 disp('解密完成'); 
 imshow(Q_jiemi);title('解密后图片');
