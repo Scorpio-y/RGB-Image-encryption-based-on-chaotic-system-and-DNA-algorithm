@@ -51,7 +51,51 @@ end
 NN=1000;    %随机取1000对像素点
 x1=ceil(rand(1,NN)*(M-1));      %生成1000个1~M-1的随机整数作为行
 y1=ceil(rand(1,NN)*(N-1));      %生成1000个1~N-1的随机整数作为列
-
+%预分配内存
+XX_R_SP=zeros(1,1000);YY_R_SP=zeros(1,1000);        %水平
+XX_G_SP=zeros(1,1000);YY_G_SP=zeros(1,1000);
+XX_B_SP=zeros(1,1000);YY_B_SP=zeros(1,1000);
+XX_R_CZ=zeros(1,1000);YY_R_CZ=zeros(1,1000);        %垂直
+XX_G_CZ=zeros(1,1000);YY_G_CZ=zeros(1,1000);
+XX_B_CZ=zeros(1,1000);YY_B_CZ=zeros(1,1000);
+XX_R_DJX=zeros(1,1000);YY_R_DJX=zeros(1,1000);      %对角线
+XX_G_DJX=zeros(1,1000);YY_G_DJX=zeros(1,1000);
+XX_B_DJX=zeros(1,1000);YY_B_DJX=zeros(1,1000);
+for i=1:1000
+    %水平
+    XX_R_SP(i)=I1(x1(i),y1(i));
+    YY_R_SP(i)=I1(x1(i)+1,y1(i));
+    XX_G_SP(i)=I2(x1(i),y1(i));
+    YY_G_SP(i)=I2(x1(i)+1,y1(i));
+    XX_B_SP(i)=I3(x1(i),y1(i));
+    YY_B_SP(i)=I3(x1(i)+1,y1(i));
+    %垂直
+    XX_R_CZ(i)=I1(x1(i),y1(i));
+    YY_R_CZ(i)=I1(x1(i),y1(i)+1);
+    XX_G_CZ(i)=I2(x1(i),y1(i));
+    YY_G_CZ(i)=I2(x1(i),y1(i)+1);
+    XX_B_CZ(i)=I3(x1(i),y1(i));
+    YY_B_CZ(i)=I3(x1(i),y1(i)+1);
+    %对角线
+    XX_R_DJX(i)=I1(x1(i),y1(i));
+    YY_R_DJX(i)=I1(x1(i)+1,y1(i)+1);
+    XX_G_DJX(i)=I2(x1(i),y1(i));
+    YY_G_DJX(i)=I2(x1(i)+1,y1(i)+1);
+    XX_B_DJX(i)=I3(x1(i),y1(i));
+    YY_B_DJX(i)=I3(x1(i)+1,y1(i)+1);
+end
+%水平
+figure;scatter(XX_R_SP,YY_R_SP,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像R通道水平相关性曲线');
+figure;scatter(XX_G_SP,YY_G_SP,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像G通道水平相关性曲线');
+figure;scatter(XX_B_SP,YY_B_SP,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像B通道水平相关性曲线');
+%垂直
+figure;scatter(XX_R_CZ,YY_R_CZ,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像R通道垂直相关性曲线');
+figure;scatter(XX_G_CZ,YY_G_CZ,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像G通道垂直相关性曲线');
+figure;scatter(XX_B_CZ,YY_B_CZ,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像B通道垂直相关性曲线');
+%对角线
+figure;scatter(XX_R_DJX,YY_R_DJX,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像R通道对角线相关性曲线');
+figure;scatter(XX_G_DJX,YY_G_DJX,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像G通道对角线相关性曲线');
+figure;scatter(XX_B_DJX,YY_B_DJX,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像B通道对角线相关性曲线');
 %R通道
 EX1_R=0;EY1_SP_R=0;DX1_R=0;DY1_SP_R=0;COVXY1_SP_R=0;    %计算水平相关性时需要的变量
 EY1_CZ_R=0;DY1_CZ_R=0;COVXY1_CZ_R=0;                %垂直
@@ -285,6 +329,50 @@ end
 Q_R=uint8(Q_R);
 Q_G=uint8(Q_G);
 Q_B=uint8(Q_B);
+
+%% 抗裁剪
+xx0=0.3456;
+xx1=0.4532;
+ppx=zeros(1,M+1000);        %预分配内存
+ppy=zeros(1,N+1000); 
+ppx(1)=xx0;
+ppy(1)=xx1;
+for i=1:M+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+    ppx(i+1)=u*ppx(i)*(1-ppx(i));
+end
+for i=1:N+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+    ppy(i+1)=u*ppy(i)*(1-ppy(i));
+end
+ppx=ppx(1001:length(ppx));            %去除前1000点，获得更好的随机性
+ppy=ppy(1001:length(ppy));
+
+[~,Ux]=sort(ppx,'descend');
+[~,Uy]=sort(ppy,'descend');
+
+for i=1:M
+    temp = Q_R(i,:);
+    Q_R(i,:) = Q_R(Ux(i),:);
+    Q_R(Ux(i),:) = temp;
+    temp = Q_G(i,:);
+    Q_G(i,:) = Q_G(Ux(i),:);
+    Q_G(Ux(i),:) = temp;
+    temp = Q_B(i,:);
+    Q_B(i,:) = Q_B(Ux(i),:);
+    Q_B(Ux(i),:) = temp;
+end
+
+for i=1:N
+    temp = Q_R(:,i);
+    Q_R(:,i) = Q_R(:,Uy(i));
+    Q_R(:,Uy(i)) = temp;
+    temp = Q_G(:,i);
+    Q_G(:,i) = Q_G(:,Uy(i));
+    Q_G(:,Uy(i)) = temp;
+    temp = Q_B(:,i);
+    Q_B(:,i) = Q_B(:,Uy(i));
+    Q_B(:,Uy(i)) = temp;
+end
+
 figure;imhist(Q_R);title('加密后R通道直方图');
 axis([0 255 0 2000]);
 figure;imhist(Q_G);title('加密后G通道直方图');
@@ -333,6 +421,54 @@ end
 计算垂直相关性时，选择每个点的相邻的下方的点；
 计算对角线相关性时，选择每个点的相邻的右下方的点。
 %}
+%相关性曲线
+%水平
+XX_R_SP=zeros(1,1000);YY_R_SP=zeros(1,1000);  %预分配内存
+XX_G_SP=zeros(1,1000);YY_G_SP=zeros(1,1000);
+XX_B_SP=zeros(1,1000);YY_B_SP=zeros(1,1000);
+%垂直
+XX_R_CZ=zeros(1,1000);YY_R_CZ=zeros(1,1000);  %预分配内存
+XX_G_CZ=zeros(1,1000);YY_G_CZ=zeros(1,1000);
+XX_B_CZ=zeros(1,1000);YY_B_CZ=zeros(1,1000);
+%对角线
+XX_R_DJX=zeros(1,1000);YY_R_DJX=zeros(1,1000);  %预分配内存
+XX_G_DJX=zeros(1,1000);YY_G_DJX=zeros(1,1000);
+XX_B_DJX=zeros(1,1000);YY_B_DJX=zeros(1,1000);
+for i=1:1000
+    %水平
+    XX_R_SP(i)=Q_R(x1(i),y1(i));
+    YY_R_SP(i)=Q_R(x1(i)+1,y1(i));
+    XX_G_SP(i)=Q_G(x1(i),y1(i));
+    YY_G_SP(i)=Q_G(x1(i)+1,y1(i));
+    XX_B_SP(i)=Q_B(x1(i),y1(i));
+    YY_B_SP(i)=Q_B(x1(i)+1,y1(i));
+    %垂直
+    XX_R_CZ(i)=Q_R(x1(i),y1(i));
+    YY_R_CZ(i)=Q_R(x1(i),y1(i)+1);
+    XX_G_CZ(i)=Q_G(x1(i),y1(i));
+    YY_G_CZ(i)=Q_G(x1(i),y1(i)+1);
+    XX_B_CZ(i)=Q_B(x1(i),y1(i));
+    YY_B_CZ(i)=Q_B(x1(i),y1(i)+1);
+    %对角线
+    XX_R_DJX(i)=Q_R(x1(i),y1(i));
+    YY_R_DJX(i)=Q_R(x1(i)+1,y1(i)+1);
+    XX_G_DJX(i)=Q_G(x1(i),y1(i));
+    YY_G_DJX(i)=Q_G(x1(i)+1,y1(i)+1);
+    XX_B_DJX(i)=Q_B(x1(i),y1(i));
+    YY_B_DJX(i)=Q_B(x1(i)+1,y1(i)+1);
+end
+%水平
+figure;scatter(XX_R_SP,YY_R_SP,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像R通道水平相关性曲线');
+figure;scatter(XX_G_SP,YY_G_SP,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像G通道水平相关性曲线');
+figure;scatter(XX_B_SP,YY_B_SP,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像B通道水平相关性曲线');
+%垂直
+figure;scatter(XX_R_CZ,YY_R_CZ,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像R通道垂直相关性曲线');
+figure;scatter(XX_G_CZ,YY_G_CZ,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像G通道垂直相关性曲线');
+figure;scatter(XX_B_CZ,YY_B_CZ,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像B通道垂直相关性曲线');
+%对角线
+figure;scatter(XX_R_DJX,YY_R_DJX,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像R通道对角线相关性曲线');
+figure;scatter(XX_G_DJX,YY_G_DJX,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像G通道对角线相关性曲线');
+figure;scatter(XX_B_DJX,YY_B_DJX,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像B通道对角线相关性曲线');
 %R通道
 Q_R=double(Q_R);
 EX2_R=0;EY2_SP_R=0;DX2_R=0;DY2_SP_R=0;COVXY2_SP_R=0;    %水平
@@ -456,7 +592,7 @@ RXY2_CZ_B=COVXY2_CZ_B/sqrt(DX2_B*DY2_CZ_B);
 RXY2_DJX_B=COVXY2_DJX_B/sqrt(DX2_B*DY2_DJX_B);
 
 %% 输出数据信息
-disp('加密成功');  
+disp('加密成功');
 disp('密钥：');
 disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0)]);
 disp(['密钥5：z(0)=',num2str(Z0),'   密钥6：h(0)=',num2str(H0),'   密钥7：M1=',num2str(M1),'   密钥8：N1=',num2str(N1)]);

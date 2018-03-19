@@ -9,6 +9,47 @@ t=4;    %分块大小
 M1=0;   %加密时补零的参数，M1=mod(M,t);作为密钥
 N1=0;   %加密时补零的参数，N1=mod(N,t);作为密钥
 SUM=M*N;
+u=3.99;
+xx0=0.3456;
+xx1=0.4532;
+ppx=zeros(1,M+1000);        %预分配内存
+ppy=zeros(1,N+1000); 
+ppx(1)=xx0;
+ppy(1)=xx1;
+for i=1:M+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+    ppx(i+1)=u*ppx(i)*(1-ppx(i));
+end
+for i=1:N+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+    ppy(i+1)=u*ppy(i)*(1-ppy(i));
+end
+ppx=ppx(1001:length(ppx));            %去除前1000点，获得更好的随机性
+ppy=ppy(1001:length(ppy));
+
+[~,Ux]=sort(ppx,'descend');
+[~,Uy]=sort(ppy,'descend');
+
+for i=N:-1:1
+    temp = I1(:,i);
+    I1(:,i) = I1(:,Uy(i));
+    I1(:,Uy(i)) = temp;
+    temp = I2(:,i);
+    I2(:,i) = I2(:,Uy(i));
+    I2(:,Uy(i)) = temp;
+    temp = I3(:,i);
+    I3(:,i) = I3(:,Uy(i));
+    I3(:,Uy(i)) = temp;
+end
+for i=M:-1:1
+    temp = I1(i,:);
+    I1(i,:) = I1(Ux(i),:);
+    I1(Ux(i),:) = temp;
+    temp = I2(i,:);
+    I2(i,:) = I2(Ux(i),:);
+    I2(Ux(i),:) = temp;
+    temp = I3(i,:);
+    I3(i,:) = I3(Ux(i),:);
+    I3(Ux(i),:) = temp;
+end
 %% 2.产生Logistic混沌序列
 % u=3.990000000000001; %密钥敏感性测试  10^-15
 u=3.99;%密钥：Logistic参数μ
@@ -83,9 +124,9 @@ for i=r:-1:2
         xx=xx-1;
         yy=e;
     end
-    Q_R((xx-1)*t+1:xx*t,(yy-1)*t+1:yy*t)=DNA_jie(Q4_R,X(i));
-    Q_G((xx-1)*t+1:xx*t,(yy-1)*t+1:yy*t)=DNA_jie(Q4_G,X(i));
-    Q_B((xx-1)*t+1:xx*t,(yy-1)*t+1:yy*t)=DNA_jie(Q4_B,X(i));
+    I1((xx-1)*t+1:xx*t,(yy-1)*t+1:yy*t)=DNA_jie(Q4_R,X(i));
+    I2((xx-1)*t+1:xx*t,(yy-1)*t+1:yy*t)=DNA_jie(Q4_G,X(i));
+    I3((xx-1)*t+1:xx*t,(yy-1)*t+1:yy*t)=DNA_jie(Q4_B,X(i));
 end
 Q5_R=DNA_bian(fenkuai(t,I1,1),H(1));
 Q5_G=DNA_bian(fenkuai(t,I2,1),H(1));
@@ -97,13 +138,13 @@ Q7_R=DNA_yunsuan(Q5_R,Q6,Z(1));
 Q7_G=DNA_yunsuan(Q5_G,Q6,Z(1));
 Q7_B=DNA_yunsuan(Q5_B,Q6,Z(1));
 
-Q_R(1:t,1:t)=DNA_jie(Q7_R,X(1));
-Q_G(1:t,1:t)=DNA_jie(Q7_G,X(1));
-Q_B(1:t,1:t)=DNA_jie(Q7_B,X(1));
+I1(1:t,1:t)=DNA_jie(Q7_R,X(1));
+I2(1:t,1:t)=DNA_jie(Q7_G,X(1));
+I3(1:t,1:t)=DNA_jie(Q7_B,X(1));
 
-Q_jiemi(:,:,1)=uint8(Q_R);
-Q_jiemi(:,:,2)=uint8(Q_G);
-Q_jiemi(:,:,3)=uint8(Q_B);
+Q_jiemi(:,:,1)=uint8(I1);
+Q_jiemi(:,:,2)=uint8(I2);
+Q_jiemi(:,:,3)=uint8(I3);
 
 %% 6、去除加密时补的零
 if M1~=0
