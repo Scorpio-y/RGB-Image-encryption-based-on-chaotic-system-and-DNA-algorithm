@@ -1,7 +1,8 @@
 %% 子函数 DNA解码
 function fv=DNA_jie(array,num)
 [m,n]=size(array);
-if num==1
+A=zeros(m,n);           %预分配内存
+if num==1 || num==2
     for i=1:m
         for j=1:n
             if array(i,j)=='A'
@@ -9,41 +10,65 @@ if num==1
             elseif array(i,j)=='T'
                 A(i,j)=3;
             elseif array(i,j)=='G'
-                A(i,j)=2;
+                if num==1
+                    A(i,j)=1;
+                else
+                    A(i,j)=2;
+                end
             else
-                A(i,j)=1;
+                if num==1
+                    A(i,j)=2;
+                else
+                    A(i,j)=1;
+                end
             end
         end
     end
-elseif num==2
+elseif num==3 || num==4
     for i=1:m
         for j=1:n
             if array(i,j)=='A'
-                A(i,j)=0;
-            elseif array(i,j)=='T'
-                A(i,j)=3;
-            elseif array(i,j)=='G'
                 A(i,j)=1;
-            else
+            elseif array(i,j)=='T'
                 A(i,j)=2;
+            elseif array(i,j)=='G'
+                if num==3
+                    A(i,j)=0;
+                else
+                    A(i,j)=3;
+                end
+            else
+                if num==3
+                    A(i,j)=3;
+                else
+                    A(i,j)=0;
+                end
             end
         end
     end
-elseif num==3
+elseif num==5 || num==6
     for i=1:m
         for j=1:n
             if array(i,j)=='A'
-                A(i,j)=3;
-            elseif array(i,j)=='T'
-                A(i,j)=0;
-            elseif array(i,j)=='G'
                 A(i,j)=2;
-            else
+            elseif array(i,j)=='T'
                 A(i,j)=1;
+            elseif array(i,j)=='G'
+                if num==5
+                    A(i,j)=0;
+                else
+                    A(i,j)=3;
+                end
+            else
+                if num==5
+                    A(i,j)=3;
+                else
+                    A(i,j)=0;
+                end
             end
         end
     end
-elseif num==4
+else                    %  num==7 || num==8
     for i=1:m
         for j=1:n
             if array(i,j)=='A'
@@ -51,65 +76,17 @@ elseif num==4
             elseif array(i,j)=='T'
                 A(i,j)=0;
             elseif array(i,j)=='G'
-                A(i,j)=1;
+                if num==7
+                    A(i,j)=1;
+                else
+                    A(i,j)=2;
+                end
             else
-                A(i,j)=2;
-            end
-        end
-    end
-elseif num==5
-    for i=1:m
-        for j=1:n
-            if array(i,j)=='A'
-                A(i,j)=1;
-            elseif array(i,j)=='T'
-                A(i,j)=2;
-            elseif array(i,j)=='G'
-                A(i,j)=0;
-            else
-                A(i,j)=3;
-            end
-        end
-    end
-elseif num==6
-    for i=1:m
-        for j=1:n
-            if array(i,j)=='A'
-                A(i,j)=2;
-            elseif array(i,j)=='T'
-                A(i,j)=1;
-            elseif array(i,j)=='G'
-                A(i,j)=0;
-            else
-                A(i,j)=3;
-            end
-        end
-    end
-elseif num==7
-    for i=1:m
-        for j=1:n
-            if array(i,j)=='A'
-                A(i,j)=1;
-            elseif array(i,j)=='T'
-                A(i,j)=2;
-            elseif array(i,j)=='G'
-                A(i,j)=3;
-            else
-                A(i,j)=0;
-            end
-        end
-    end
-else
-    for i=1:m
-        for j=1:n
-            if array(i,j)=='A'
-                A(i,j)=2;
-            elseif array(i,j)=='T'
-                A(i,j)=1;
-            elseif array(i,j)=='G'
-                A(i,j)=3;
-            else
-                A(i,j)=0;
+                if num==7
+                    A(i,j)=2;
+                else
+                    A(i,j)=1;
+                end
             end
         end
     end

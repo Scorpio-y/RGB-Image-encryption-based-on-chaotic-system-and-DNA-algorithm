@@ -1,17 +1,65 @@
 %% 图像质量评价——均方误差（Mean Square Error,MSE）、峰值信噪比（Peak-Signal to Noise Ratio,PSNR）
+%   @author:沈洋
+%   @date:2018.03.13
+%-------------------------------------------------------------------------------------------------------%
 clear;clc;
 I=imread('../原始、加密、解密图片/加密后的lena.png','png');           %读取图像信息
-[M,N]=size(I(:,:,1));                      %将图像的行列赋值给M,N
+I1=I(:,:,1);     %R通道
+I2=I(:,:,2);     %G通道
+I3=I(:,:,3);     %B通道
+[M,N]=size(I1);                      %将图像的行列赋值给M,N
 t=4;    %分块大小
 M1=0;   %加密时补零的参数，M1=mod(M,t);作为密钥
 N1=0;   %加密时补零的参数，N1=mod(N,t);作为密钥
+u=3.9999;%Logistic参数μ
 SUM=M*N;
-% I=imnoise(I,'salt & pepper',0.1);         %加入10%的椒盐噪声
-%加入高斯噪声，用于图像质量评价
 
+%% 反置乱
+xx0=0.3883;
+xx1=0.4134;
+ppx=zeros(1,M+1000);        %预分配内存
+ppy=zeros(1,N+1000); 
+ppx(1)=xx0;
+ppy(1)=xx1;
+for i=1:M+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+    ppx(i+1)=u*ppx(i)*(1-ppx(i));
+end
+for i=1:N+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+    ppy(i+1)=u*ppy(i)*(1-ppy(i));
+end
+ppx=ppx(1001:length(ppx));            %去除前1000点，获得更好的随机性
+ppy=ppy(1001:length(ppy));
+
+[~,Ux]=sort(ppx,'descend');
+[~,Uy]=sort(ppy,'descend');
+
+for i=N:-1:1
+    temp = I1(:,i);
+    I1(:,i) = I1(:,Uy(i));
+    I1(:,Uy(i)) = temp;
+    temp = I2(:,i);
+    I2(:,i) = I2(:,Uy(i));
+    I2(:,Uy(i)) = temp;
+    temp = I3(:,i);
+    I3(:,i) = I3(:,Uy(i));
+    I3(:,Uy(i)) = temp;
+end
+for i=M:-1:1
+    temp = I1(i,:);
+    I1(i,:) = I1(Ux(i),:);
+    I1(Ux(i),:) = temp;
+    temp = I2(i,:);
+    I2(i,:) = I2(Ux(i),:);
+    I2(Ux(i),:) = temp;
+    temp = I3(i,:);
+    I3(i,:) = I3(Ux(i),:);
+    I3(Ux(i),:) = temp;
+end
+I(:,:,1)=I1;     %R通道
+I(:,:,2)=I2;     %G通道
+I(:,:,3)=I3;     %B通道
 %% 产生Logistic混沌序列
-u=3.99;%Logistic参数μ
-x0=0.7067; %Logistic初值x0
+x0=0.5475; %Logistic初值x0
 p=zeros(1,SUM+1000);
 p(1)=x0;
 for i=1:SUM+999                        %进行N-1次循环
@@ -20,34 +68,34 @@ end
 p=p(1001:length(p));
 
 %% 将p序列变换到0~255范围内整数，转换成M*N的二维矩阵R
-p=mod(ceil(p*10^3),256);
+p=mod(round(p*10^4),256);
 R=reshape(p,N,M)';  %转成M行N列
 
 %% 求解混沌方程
 %求四个初值X0,Y0,Z0,H0
 r=(M/t)*(N/t);
-X0=0.5008;
-Y0=0.5109;
-Z0=0.4893;
-H0=0.7765;
+X0=0.4953;
+Y0=0.4265;
+Z0=0.6928;
+H0=0.7803;
 A=chen_output(X0,Y0,Z0,H0,r);
 X=A(:,1);
-X=X(1502:length(X));
+X=X(3002:length(X));
 Y=A(:,2);
-Y=Y(1502:length(Y));
+Y=Y(3002:length(Y));
 Z=A(:,3);
-Z=Z(1502:length(Z));
+Z=Z(3002:length(Z));
 H=A(:,4);
-H=H(1502:length(H));
+H=H(3002:length(H));
 
  %X,Y分别决定I和R的DNA编码方式，有8种，1~8
-X=mod(floor(X*10^4),8)+1;
-Y=mod(floor(Y*10^4),8)+1;
-Z=mod(floor(Z*10^4),3);
-Z(Z==0)=3;
+X=mod(round(X*10^4),8)+1;
+Y=mod(round(Y*10^4),8)+1;
+Z=mod(round(Z*10^4),4);
+Z(Z==0)=4;
 Z(Z==1)=0;
-Z(Z==3)=1;
-H=mod(floor(H*10^4),8)+1;
+Z(Z==4)=1;
+H=mod(round(H*10^4),8)+1;
 e=N/t;
 %% 图像质量评价
 YY=imread('../原始、加密、解密图片/lena.png','png');        %读取图像信息
@@ -57,8 +105,10 @@ Y2=YY(:,:,2);        %G
 Y3=YY(:,:,3);        %B
 MSE_R=zeros(1,21);MSE_G=zeros(1,21);MSE_B=zeros(1,21);
 j=0;        %数组下标
-for i=0:5:100
-    I = imnoise(I, 'gaussian', 0, i^2/255^2);  %加入高斯白噪声
+%for i=0:5:100
+%     I = imnoise(I, 'gaussian', 0, i^2/255^2);  %加入高斯白噪声
+for i=0:0.05:1
+    I = imnoise(I,'salt & pepper',i);
     I1=I(:,:,1);     %R通道
     I2=I(:,:,2);     %G通道
     I3=I(:,:,3);     %B通道
@@ -131,10 +181,10 @@ for i=0:5:100
             MSE_B(j)=MSE_B(j)+(Y3(m,n)-Q3(m,n))^2;       %B通道MSE
         end
     end
-%     RESULT(:,:,1)=uint8(Q_R);
-%     RESULT(:,:,2)=uint8(Q_G);
-%     RESULT(:,:,3)=uint8(Q_B);
-%     figure;imshow(RESULT);title(['高斯噪声方差为',num2str(i),'时的解密图像']);
+    RESULT(:,:,1)=uint8(Q_R);
+    RESULT(:,:,2)=uint8(Q_G);
+    RESULT(:,:,3)=uint8(Q_B);
+    figure;imshow(RESULT);title(['椒盐噪声密度为',num2str(i),'时的解密图像']);
 end
 %噪声功率-MSE
 MSE_R=MSE_R./SUM;
@@ -145,10 +195,11 @@ PSNR_R=10*log10((255^2)./MSE_R);
 PSNR_G=10*log10((255^2)./MSE_G);
 PSNR_B=10*log10((255^2)./MSE_B);
 %% 绘图，噪声功率-MSE、峰值信噪比-PSNR
-X=0:5:100;
-figure;plot(X,MSE_R);set(gca,'xtick', X);xlabel('高斯噪声方差');ylabel('均方误差MSE');title('R通道：高斯噪声方差-均方误差MSE曲线图');
-figure;plot(X,MSE_G);set(gca,'xtick', X);xlabel('高斯噪声方差');ylabel('均方误差MSE');title('G通道：高斯噪声方差-均方误差MSE曲线图');
-figure;plot(X,MSE_B);set(gca,'xtick', X);xlabel('高斯噪声方差');ylabel('均方误差MSE');title('B通道：高斯噪声方差-均方误差MSE曲线图');
-figure;plot(X,PSNR_R);set(gca,'xtick', X);xlabel('高斯噪声方差');ylabel('峰值信噪比PSNR（dB）');title('R通道：高斯噪声方差-峰值信噪比PSNR曲线图');
-figure;plot(X,PSNR_G);set(gca,'xtick', X);xlabel('高斯噪声方差');ylabel('峰值信噪比PSNR（dB）');title('G通道：高斯噪声方差-峰值信噪比PSNR曲线图');
-figure;plot(X,PSNR_B);set(gca,'xtick', X);xlabel('高斯噪声方差');ylabel('峰值信噪比PSNR（dB）');title('B通道：高斯噪声方差-峰值信噪比PSNR曲线图');
+% set(gca,'xtick', X);
+X=0:0.05:1;
+figure;plot(X,MSE_R);xlabel('椒盐噪声密度');ylabel('均方误差MSE');title('R通道：椒盐噪声密度-均方误差MSE曲线图');
+figure;plot(X,MSE_G);xlabel('椒盐噪声密度');ylabel('均方误差MSE');title('G通道：椒盐噪声密度-均方误差MSE曲线图');
+figure;plot(X,MSE_B);xlabel('椒盐噪声密度');ylabel('均方误差MSE');title('B通道：椒盐噪声密度-均方误差MSE曲线图');
+figure;plot(X,PSNR_R);xlabel('椒盐噪声密度');ylabel('峰值信噪比PSNR（dB）');title('R通道：椒盐噪声密度-峰值信噪比PSNR曲线图');
+figure;plot(X,PSNR_G);xlabel('椒盐噪声密度');ylabel('峰值信噪比PSNR（dB）');title('G通道：椒盐噪声密度-峰值信噪比PSNR曲线图');
+figure;plot(X,PSNR_B);xlabel('椒盐噪声密度');ylabel('峰值信噪比PSNR（dB）');title('B通道：椒盐噪声密度-峰值信噪比PSNR曲线图');

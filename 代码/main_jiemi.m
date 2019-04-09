@@ -1,4 +1,7 @@
-%% 基于混沌系统与DNA编码的彩色数字图像加密解密
+%% 基于混沌系统与DNA编码的彩色数字图像解密系统
+%   @author:沈洋
+%   @date:2018.03.20
+%-------------------------------------------------------------------------------------------------------%
 clear;clc;
 I=imread('../原始、加密、解密图片/加密后的lena.png','png');           %读取图像信息
 I1=I(:,:,1);     %R通道
@@ -6,20 +9,18 @@ I2=I(:,:,2);     %G通道
 I3=I(:,:,3);     %B通道
 [M,N]=size(I1);                      %将图像的行列赋值给M,N
 t=4;    %分块大小
-M1=0;   %加密时补零的参数，M1=mod(M,t);作为密钥
-N1=0;   %加密时补零的参数，N1=mod(N,t);作为密钥
 SUM=M*N;
-u=3.99;     %密钥1：μ
+u=3.9999;     %密钥1：μ
 xx0=0.3883;
 xx1=0.4134;
 ppx=zeros(1,M+1000);        %预分配内存
 ppy=zeros(1,N+1000); 
 ppx(1)=xx0;
 ppy(1)=xx1;
-for i=1:M+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+for i=1:M+999                 %进行M+999次循环，共得到M+1000点（包括初值）
     ppx(i+1)=u*ppx(i)*(1-ppx(i));
 end
-for i=1:N+999                 %进行SUM+999次循环，共得到SUM+1000点（包括初值）
+for i=1:N+999                 %进行M+999次循环，共得到M+1000点（包括初值）
     ppy(i+1)=u*ppy(i)*(1-ppy(i));
 end
 ppx=ppx(1001:length(ppx));            %去除前1000点，获得更好的随机性
@@ -54,50 +55,50 @@ end
 % u=3.990000000000001; %密钥敏感性测试  10^-15
 %u=3.99;%密钥：Logistic参数μ
 % x0=0.7067000000000001; %密钥敏感性测试  10^-16
-x0=0.7067; %密钥：Logistic初值x0
+x0=0.5475; %密钥：Logistic初值x0
 % x0=0.3462;            %home图片
 p=zeros(1,SUM+1000);
 p(1)=x0;
-for i=1:SUM+999                        %进行N-1次循环
-    p(i+1)=u*p(i)*(1-p(i));          %循环产生密码
+for i=1:SUM+999                        %进行SUM+999次循环，产生SUM+1000个数据
+    p(i+1)=u*p(i)*(1-p(i));
 end
 p=p(1001:length(p));
 
 %% 3.将p序列变换到0~255范围内整数，转换成M*N的二维矩阵R
-p=mod(ceil(p*10^3),256);
+p=mod(round(p*10^4),256);
 R=reshape(p,N,M)';  %转成M行N列
 
 %% 4.求解混沌方程
 %求四个初值X0,Y0,Z0,H0
 r=(M/t)*(N/t);
 % X0=0.5008000000000001;        %密钥敏感性测试
-X0=0.5008;
-Y0=0.5109;
-Z0=0.4893;
-H0=0.7765;
+X0=0.4953;
+Y0=0.4265;
+Z0=0.6928;
+H0=0.7803;
 % X0=0.5056;        %home图片
 % Y0=0.505;
 % Z0=0.4564;
 % H0=0.3062;
 A=chen_output(X0,Y0,Z0,H0,r);
 X=A(:,1);
-X=X(1502:length(X));
+X=X(3002:length(X));
 Y=A(:,2);
-Y=Y(1502:length(Y));
+Y=Y(3002:length(Y));
 Z=A(:,3);
-Z=Z(1502:length(Z));
+Z=Z(3002:length(Z));
 H=A(:,4);
-H=H(1502:length(H));
+H=H(3002:length(H));
 
 %% 5.DNA编码
 %X,Y分别决定I和R的DNA编码方式，有8种，1~8
-X=mod(floor(X*10^4),8)+1;
-Y=mod(floor(Y*10^4),8)+1;
-Z=mod(floor(Z*10^4),3);
-Z(Z==0)=3;
+X=mod(round(X*10^4),8)+1;
+Y=mod(round(Y*10^4),8)+1;
+Z=mod(round(Z*10^4),4);
+Z(Z==0)=4;      %加减法互换
 Z(Z==1)=0;
-Z(Z==3)=1;
-H=mod(floor(H*10^4),8)+1;
+Z(Z==4)=1;
+H=mod(round(H*10^4),8)+1;
 e=N/t;
 for i=r:-1:2
     Q1_R=DNA_bian(fenkuai(t,I1,i),H(i));
@@ -147,19 +148,28 @@ Q_jiemi(:,:,2)=uint8(I2);
 Q_jiemi(:,:,3)=uint8(I3);
 
 %% 6、去除加密时补的零
+M1=0;   %加密时补零的参数，M1=mod(M,t);作为密钥
+N1=0;   %加密时补零的参数，N1=mod(N,t);作为密钥
 if M1~=0
     Q_jiemi=Q_jiemi(1:M-t+M1,:,:);
 end
 if N1~=0
     Q_jiemi=Q_jiemi(:,1:N-t+N1,:);
 end
+
+figure;imhist(Q_jiemi(:,:,1));
+figure;imhist(Q_jiemi(:,:,2));
+figure;imhist(Q_jiemi(:,:,3));
+
 %比较解密后的图与原图是否完全相同
-II=imread('../原始、加密、解密图片/lena.png','png');
-cha=sum(sum(sum(Q_jiemi-II)));      %两幅图做差后求总和
+%II=imread('../原始、加密、解密图片/lena.png','png');
+%cha=sum(sum(sum(Q_jiemi-II)));      %两幅图做差后求总和
 %% 保存图片
+
 imwrite(Q_jiemi,'../原始、加密、解密图片/解密后的lena.png','png');       
 disp('您输入的解密密钥为：');
 disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0),'   密钥5：z(0)=',num2str(Z0),]);
 disp(['密钥6：h(0)=',num2str(H0),'   密钥7：M1=',num2str(M1),'   密钥8：N1=',num2str(N1),'   密钥9：xx0=',num2str(xx0),'   密钥10：xx1=',num2str(xx1)]);
 disp('解密完成'); 
-imshow(Q_jiemi);title('解密后图片');
+figure;imshow(Q_jiemi);
+%title('解密后图片');

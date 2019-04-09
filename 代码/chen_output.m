@@ -5,7 +5,7 @@ function fy=chen_output(x0,y0,z0,h0,num)
 % 微分方程求解
 opt = odeset('Mass',@mass);
 y0=[x0;y0;z0;h0];
-[~,y] = ode45(@ode,0:500/(num+1500):500,y0,opt);
+[~,y] = ode45(@ode,0:500/(num+3000):500,y0,opt);
 fy=y;
     function f = ode(~,y)
         y1=y(1);

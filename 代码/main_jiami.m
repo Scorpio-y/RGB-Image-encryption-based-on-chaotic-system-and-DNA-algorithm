@@ -1,4 +1,7 @@
 %% 基于混沌系统与DNA编码的彩色数字图像加密系统
+%   @author:沈洋
+%   @date:2018.03.20
+%-------------------------------------------------------------------------------------------------------%
 clear;clc;
 I=imread('../原始、加密、解密图片/lena.png','png');         %读取图像信息
 I1=I(:,:,1);        %R
@@ -43,25 +46,25 @@ end
 
 %% 原始图像相邻像素相关性分析
 %{
-先随机在0~M-1行和0~N-1列选中1000个像素点，
+先随机在0~M-1行和0~N-1列选中5000个像素点，
 计算水平相关性时，选择每个点的相邻的右边的点；
 计算垂直相关性时，选择每个点的相邻的下方的点；
 计算对角线相关性时，选择每个点的相邻的右下方的点。
 %}
-NN=1000;    %随机取1000对像素点
-x1=ceil(rand(1,NN)*(M-1));      %生成1000个1~M-1的随机整数作为行
-y1=ceil(rand(1,NN)*(N-1));      %生成1000个1~N-1的随机整数作为列
+NN=5000;    %随机取5000对像素点
+x1=ceil(rand(1,NN)*(M-1));      %生成5000个1~M-1的随机整数作为行
+y1=ceil(rand(1,NN)*(N-1));      %生成5000个1~N-1的随机整数作为列
 %预分配内存
-XX_R_SP=zeros(1,1000);YY_R_SP=zeros(1,1000);        %水平
-XX_G_SP=zeros(1,1000);YY_G_SP=zeros(1,1000);
-XX_B_SP=zeros(1,1000);YY_B_SP=zeros(1,1000);
-XX_R_CZ=zeros(1,1000);YY_R_CZ=zeros(1,1000);        %垂直
-XX_G_CZ=zeros(1,1000);YY_G_CZ=zeros(1,1000);
-XX_B_CZ=zeros(1,1000);YY_B_CZ=zeros(1,1000);
-XX_R_DJX=zeros(1,1000);YY_R_DJX=zeros(1,1000);      %对角线
-XX_G_DJX=zeros(1,1000);YY_G_DJX=zeros(1,1000);
-XX_B_DJX=zeros(1,1000);YY_B_DJX=zeros(1,1000);
-for i=1:1000
+XX_R_SP=zeros(1,NN);YY_R_SP=zeros(1,NN);        %水平
+XX_G_SP=zeros(1,NN);YY_G_SP=zeros(1,NN);
+XX_B_SP=zeros(1,NN);YY_B_SP=zeros(1,NN);
+XX_R_CZ=zeros(1,NN);YY_R_CZ=zeros(1,NN);        %垂直
+XX_G_CZ=zeros(1,NN);YY_G_CZ=zeros(1,NN);
+XX_B_CZ=zeros(1,NN);YY_B_CZ=zeros(1,NN);
+XX_R_DJX=zeros(1,NN);YY_R_DJX=zeros(1,NN);      %对角线
+XX_G_DJX=zeros(1,NN);YY_G_DJX=zeros(1,NN);
+XX_B_DJX=zeros(1,NN);YY_B_DJX=zeros(1,NN);
+for i=1:NN
     %水平
     XX_R_SP(i)=I1(x1(i),y1(i));
     YY_R_SP(i)=I1(x1(i)+1,y1(i));
@@ -85,17 +88,17 @@ for i=1:1000
     YY_B_DJX(i)=I3(x1(i)+1,y1(i)+1);
 end
 %水平
-figure;scatter(XX_R_SP,YY_R_SP,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像R通道水平相关性曲线');
-figure;scatter(XX_G_SP,YY_G_SP,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像G通道水平相关性曲线');
-figure;scatter(XX_B_SP,YY_B_SP,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像B通道水平相关性曲线');
+figure;scatter(XX_R_SP,YY_R_SP,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像R通道水平相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_G_SP,YY_G_SP,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像G通道水平相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_B_SP,YY_B_SP,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('原始图像B通道水平相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
 %垂直
-figure;scatter(XX_R_CZ,YY_R_CZ,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像R通道垂直相关性曲线');
-figure;scatter(XX_G_CZ,YY_G_CZ,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像G通道垂直相关性曲线');
-figure;scatter(XX_B_CZ,YY_B_CZ,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像B通道垂直相关性曲线');
+figure;scatter(XX_R_CZ,YY_R_CZ,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像R通道垂直相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_G_CZ,YY_G_CZ,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像G通道垂直相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_B_CZ,YY_B_CZ,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('原始图像B通道垂直相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
 %对角线
-figure;scatter(XX_R_DJX,YY_R_DJX,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像R通道对角线相关性曲线');
-figure;scatter(XX_G_DJX,YY_G_DJX,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像G通道对角线相关性曲线');
-figure;scatter(XX_B_DJX,YY_B_DJX,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像B通道对角线相关性曲线');
+figure;scatter(XX_R_DJX,YY_R_DJX,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像R通道对角线相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_G_DJX,YY_G_DJX,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像G通道对角线相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_B_DJX,YY_B_DJX,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('原始图像B通道对角线相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
 %R通道
 EX1_R=0;EY1_SP_R=0;DX1_R=0;DY1_SP_R=0;COVXY1_SP_R=0;    %计算水平相关性时需要的变量
 EY1_CZ_R=0;DY1_CZ_R=0;COVXY1_CZ_R=0;                %垂直
@@ -220,8 +223,8 @@ RXY1_DJX_B=COVXY1_DJX_B/sqrt(DX1_B*DY1_DJX_B);
 
 %% 1.补零
 %将图像的行列数都补成可以被t整除的数，t为分块的大小。
-M1=mod(M,t);    %可作为固定密钥，一遍解码时可以去除补上的0
-N1=mod(N,t);    %可作为固定密钥，一遍解码时可以去除补上的0
+M1=mod(M,t);    %可作为固定密钥，以便解码时可以去除补上的0
+N1=mod(N,t);    %可作为固定密钥，以便解码时可以去除补上的0
 if M1~=0
     I1(M+1:M+t-M1,:)=0;
     I2(M+1:M+t-M1,:)=0;
@@ -236,8 +239,8 @@ end
 SUM=M*N;
 
 %% 2.产生Logistic混沌序列
-u=3.99;     %Logistic参数μ，自定为3.99
-x0=sum(I1(:))/(255*SUM);     %计算得出Logistic初值x0
+u=3.9999;     %Logistic参数μ，自定为3.99
+x0=(sum(I1(:))+sum(I2(:)))/(255*SUM*2);     %计算得出Logistic初值x0
 x0=floor(x0*10^4)/10^4;     %保留4位小数
 p=zeros(1,SUM+1000);        %预分配内存
 p(1)=x0;
@@ -247,41 +250,46 @@ end
 p=p(1001:length(p));            %去除前1000点，获得更好的随机性
 
 %% 3.将p序列变换到0~255范围内整数，转换成M*N的二维矩阵R
-p=mod(ceil(p*10^3),256);
+p=mod(round(p*10^4),256);
 R=reshape(p,N,M)';  %转成M行N列的随机矩阵R
 
 %% 4.求解Chen氏超混沌系统
 %求四个初值X0,Y0,Z0,H0
 r=(M/t)*(N/t);      %r为分块个数
 %求出四个初值
-X0=sum(sum(bitand(I1,3)))/(3*SUM);
-Y0=sum(sum(bitand(I1,12)/4))/(3*SUM);
-Z0=sum(sum(bitand(I1,48)/16))/(3*SUM);
-H0=sum(sum(bitand(I1,192)/64))/(3*SUM);
+X0=sum(sum(bitand(I1,17)))/(17*SUM);
+Y0=sum(sum(bitand(I2,34)))/(34*SUM);
+Z0=sum(sum(bitand(I3,68)))/(68*SUM);
+H0=sum(sum(bitand(I1,136)))/(136*SUM);
 %保留四位小数
-X0=floor(X0*10^4)/10^4;
-Y0=floor(Y0*10^4)/10^4;
-Z0=floor(Z0*10^4)/10^4;
-H0=floor(H0*10^4)/10^4;
+X0=round(X0*10^4)/10^4;
+Y0=round(Y0*10^4)/10^4;
+Z0=round(Z0*10^4)/10^4;
+H0=round(H0*10^4)/10^4;
 %根据初值，求解Chen氏超混沌系统，得到四个混沌序列
 A=chen_output(X0,Y0,Z0,H0,r);   
 X=A(:,1);
-X=X(1502:length(X));        %去除前1501项，获得更好的随机性（求解陈氏系统的子函数多计算了1500点）
+X=X(3002:length(X));        %去除前3001项，获得更好的随机性（求解陈氏系统的子函数多计算了3000点）
 Y=A(:,2);
-Y=Y(1502:length(Y));
+Y=Y(3002:length(Y));
 Z=A(:,3);
-Z=Z(1502:length(Z));
+Z=Z(3002:length(Z));
 H=A(:,4);
-H=H(1502:length(H));
+H=H(3002:length(H));
 
+% figure
+% plot3(X,Y,Z)
+% xlabel('\itx')
+% ylabel('\ity')
+% zlabel('\itz')
 %% 5.DNA编码
 %X,Y分别决定I和R的DNA编码方式，有8种，1~8
-%Z决定运算方式，有3种，0~2，0表示加，1表示减，2表示异或
+%Z决定运算方式，有4种，0~3，0表示加，1表示减，2表示异或，3表示同或
 %H表示DNA解码方式，有8种，1~8
-X=mod(floor(X*10^4),8)+1;
-Y=mod(floor(Y*10^4),8)+1;
-Z=mod(floor(Z*10^4),3);
-H=mod(floor(H*10^4),8)+1;
+X=mod(round(X*10^4),8)+1;
+Y=mod(round(Y*10^4),8)+1;
+Z=mod(round(Z*10^4),4);
+H=mod(round(H*10^4),8)+1;
 e=N/t;  %e表示每一行可以分为多少块
 
 Q2=DNA_bian(fenkuai(t,R,1),Y(1));
@@ -404,8 +412,8 @@ S2_B=sum(T2_B);
 xxs2_B=0;
 for i=1:256
     pp2_R=T2_R(i)/S2_R;
-    pp2_G=T2_R(i)/S2_G;
-    pp2_B=T2_R(i)/S2_B;
+    pp2_G=T2_G(i)/S2_G;
+    pp2_B=T2_B(i)/S2_B;
     if pp2_R~=0
         xxs2_R=xxs2_R-pp2_R*log2(pp2_R);
     end
@@ -426,18 +434,18 @@ end
 %}
 %相关性曲线
 %水平
-XX_R_SP=zeros(1,1000);YY_R_SP=zeros(1,1000);  %预分配内存
-XX_G_SP=zeros(1,1000);YY_G_SP=zeros(1,1000);
-XX_B_SP=zeros(1,1000);YY_B_SP=zeros(1,1000);
+XX_R_SP=zeros(1,NN);YY_R_SP=zeros(1,NN);  %预分配内存
+XX_G_SP=zeros(1,NN);YY_G_SP=zeros(1,NN);
+XX_B_SP=zeros(1,NN);YY_B_SP=zeros(1,NN);
 %垂直
-XX_R_CZ=zeros(1,1000);YY_R_CZ=zeros(1,1000);  %预分配内存
-XX_G_CZ=zeros(1,1000);YY_G_CZ=zeros(1,1000);
-XX_B_CZ=zeros(1,1000);YY_B_CZ=zeros(1,1000);
+XX_R_CZ=zeros(1,NN);YY_R_CZ=zeros(1,NN);  %预分配内存
+XX_G_CZ=zeros(1,NN);YY_G_CZ=zeros(1,NN);
+XX_B_CZ=zeros(1,NN);YY_B_CZ=zeros(1,NN);
 %对角线
-XX_R_DJX=zeros(1,1000);YY_R_DJX=zeros(1,1000);  %预分配内存
-XX_G_DJX=zeros(1,1000);YY_G_DJX=zeros(1,1000);
-XX_B_DJX=zeros(1,1000);YY_B_DJX=zeros(1,1000);
-for i=1:1000
+XX_R_DJX=zeros(1,NN);YY_R_DJX=zeros(1,NN);  %预分配内存
+XX_G_DJX=zeros(1,NN);YY_G_DJX=zeros(1,NN);
+XX_B_DJX=zeros(1,NN);YY_B_DJX=zeros(1,NN);
+for i=1:NN
     %水平
     XX_R_SP(i)=Q_R(x1(i),y1(i));
     YY_R_SP(i)=Q_R(x1(i)+1,y1(i));
@@ -461,17 +469,17 @@ for i=1:1000
     YY_B_DJX(i)=Q_B(x1(i)+1,y1(i)+1);
 end
 %水平
-figure;scatter(XX_R_SP,YY_R_SP,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像R通道水平相关性曲线');
-figure;scatter(XX_G_SP,YY_G_SP,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像G通道水平相关性曲线');
-figure;scatter(XX_B_SP,YY_B_SP,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像B通道水平相关性曲线');
+figure;scatter(XX_R_SP,YY_R_SP,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像R通道水平相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_G_SP,YY_G_SP,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像G通道水平相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_B_SP,YY_B_SP,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻水平方向像素灰度值');title('加密图像B通道水平相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
 %垂直
-figure;scatter(XX_R_CZ,YY_R_CZ,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像R通道垂直相关性曲线');
-figure;scatter(XX_G_CZ,YY_G_CZ,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像G通道垂直相关性曲线');
-figure;scatter(XX_B_CZ,YY_B_CZ,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像B通道垂直相关性曲线');
+figure;scatter(XX_R_CZ,YY_R_CZ,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像R通道垂直相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_G_CZ,YY_G_CZ,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像G通道垂直相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_B_CZ,YY_B_CZ,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻垂直方向像素灰度值');title('加密图像B通道垂直相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
 %对角线
-figure;scatter(XX_R_DJX,YY_R_DJX,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像R通道对角线相关性曲线');
-figure;scatter(XX_G_DJX,YY_G_DJX,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像G通道对角线相关性曲线');
-figure;scatter(XX_B_DJX,YY_B_DJX,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像B通道对角线相关性曲线');
+figure;scatter(XX_R_DJX,YY_R_DJX,18,'filled');xlabel('R通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像R通道对角线相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_G_DJX,YY_G_DJX,18,'filled');xlabel('G通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像G通道对角线相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
+figure;scatter(XX_B_DJX,YY_B_DJX,18,'filled');xlabel('B通道随机点像素灰度值');ylabel('与该点相邻对角线方向像素灰度值');title('加密图像B通道对角线相邻元素相关性点图');axis([0 255,0 255]);set(gca,'XTick',0:15:255);set(gca,'YTick',0:15:255);
 %R通道
 Q_R=double(Q_R);
 EX2_R=0;EY2_SP_R=0;DX2_R=0;DY2_SP_R=0;COVXY2_SP_R=0;    %水平
@@ -597,7 +605,7 @@ RXY2_DJX_B=COVXY2_DJX_B/sqrt(DX2_B*DY2_DJX_B);
 %% 输出数据信息
 disp('加密成功');
 disp('密钥：');
-disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0),'   密钥5：z(0)=',num2str(Z0),]);
+disp(['密钥1：μ=',num2str(u),'     密钥2：x0=',num2str(x0),'    密钥3：x(0)=',num2str(X0),'    密钥4：y(0)=',num2str(Y0),'   密钥5：z(0)=',num2str(Z0)]);
 disp(['密钥6：h(0)=',num2str(H0),'   密钥7：M1=',num2str(M1),'   密钥8：N1=',num2str(N1),'   密钥9：xx0=',num2str(xx0),'   密钥10：xx1=',num2str(xx1)]);
 disp('信息熵：');
 disp(['原始图片R通道信息熵=',num2str(xxs1_R),'  原始图片G通道信息熵=',num2str(xxs1_G),'  原始图片B通道信息熵=',num2str(xxs1_B)]);
